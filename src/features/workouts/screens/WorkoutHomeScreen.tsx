@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Link } from 'expo-router';
 import { WorkoutSummary } from '../components/WorkoutSummary';
 import { useWorkoutNotification } from '../hooks/useWorkoutNotification';
 import {
@@ -400,6 +401,24 @@ function WorkoutContent({
         Tap a workout type to start your session
       </Text>
       <WorkoutSummary workouts={history} />
+      {!activeWorkout && (
+        <Link href="/strength" asChild>
+          <Pressable
+            accessibilityRole="button"
+            style={StyleSheet.flatten([
+              styles.startButton,
+              {
+                marginTop: 0,
+                marginBottom: 24,
+              },
+            ])}
+          >
+            <Text style={styles.startButtonText}>
+              Open Strength Training
+            </Text>
+          </Pressable>
+        </Link>
+      )}
       {notificationError !== null && (
         <View>
           <Text
@@ -472,7 +491,9 @@ function WorkoutContent({
               (activeWorkout?.type ?? selectedType) === type
             }
             onPress={() => {
-              void handleStartWorkout(type);
+              if (!activeWorkout && !actionRef.current) {
+    setSelectedType(type);
+              }
             }}
           />
         ))}
@@ -798,24 +819,24 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   historyFilters: {
-  gap: 8,
-  marginTop: 16,
-  paddingBottom: 16,
-},
-filterButton: {
-  paddingHorizontal: 16,
-  paddingVertical: 10,
-  borderRadius: 20,
-  backgroundColor: '#18221F',
-},
-filterButtonSelected: {
-  backgroundColor: '#C8F169',
-},
-filterText: {
-  color: '#AAB8B1',
-  fontWeight: '600',
-},
-filterTextSelected: {
-  color: '#101513',
-},
+    gap: 8,
+    marginTop: 16,
+    paddingBottom: 16,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#18221F',
+  },
+  filterButtonSelected: {
+    backgroundColor: '#C8F169',
+  },
+  filterText: {
+    color: '#AAB8B1',
+    fontWeight: '600',
+  },
+  filterTextSelected: {
+    color: '#101513',
+  },
 });
