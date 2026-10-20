@@ -1,8 +1,4 @@
-import type {
-  StrengthExercise,
-  StrengthSession,
-  StrengthSet,
-} from '../types/strength.types';
+import type { StrengthExercise, StrengthSession, StrengthSet } from '../types/strength.types';
 
 let idCounter = 0;
 
@@ -46,9 +42,7 @@ export function createStrengthSet(): StrengthSet {
   };
 }
 
-export function createStrengthExercise(
-  name: string,
-): StrengthExercise {
+export function createStrengthExercise(name: string): StrengthExercise {
   return {
     id: createId(),
     name: requireName(name, 'Exercise name'),
@@ -57,9 +51,7 @@ export function createStrengthExercise(
   };
 }
 
-export function createStrengthSession(
-  name: string,
-): StrengthSession {
+export function createStrengthSession(name: string): StrengthSession {
   return {
     id: createId(),
     name: requireName(name, 'Session name'),
@@ -85,15 +77,10 @@ export function addExerciseToSession(
   };
 }
 
-export function addSetToExercise(
-  session: StrengthSession,
-  exerciseId: string,
-): StrengthSession {
+export function addSetToExercise(session: StrengthSession, exerciseId: string): StrengthSession {
   requireActiveSession(session);
 
-  const exerciseExists = session.exercises.some(
-    (exercise) => exercise.id === exerciseId,
-  );
+  const exerciseExists = session.exercises.some((exercise) => exercise.id === exerciseId);
 
   if (!exerciseExists) {
     throw new Error('Exercise not found.');
@@ -125,25 +112,17 @@ export function updateStrengthSet(
 ): StrengthSession {
   requireActiveSession(session);
 
-  const exercise = session.exercises.find(
-    (item) => item.id === exerciseId,
-  );
+  const exercise = session.exercises.find((item) => item.id === exerciseId);
 
   if (!exercise || !exercise.sets.some((set) => set.id === setId)) {
     throw new Error('Exercise or set not found.');
   }
 
-  if (
-    values.reps !== null &&
-    (!Number.isSafeInteger(values.reps) || values.reps <= 0)
-  ) {
+  if (values.reps !== null && (!Number.isSafeInteger(values.reps) || values.reps <= 0)) {
     throw new Error('Reps must be a positive whole number.');
   }
 
-  if (
-    values.weightKg !== null &&
-    (!Number.isFinite(values.weightKg) || values.weightKg < 0)
-  ) {
+  if (values.weightKg !== null && (!Number.isFinite(values.weightKg) || values.weightKg < 0)) {
     throw new Error('Weight must be zero or greater.');
   }
 
@@ -174,13 +153,9 @@ export function toggleStrengthSetCompleted(
 ): StrengthSession {
   requireActiveSession(session);
 
-  const exercise = session.exercises.find(
-    (item) => item.id === exerciseId,
-  );
+  const exercise = session.exercises.find((item) => item.id === exerciseId);
 
-  const targetSet = exercise?.sets.find(
-    (set) => set.id === setId,
-  );
+  const targetSet = exercise?.sets.find((set) => set.id === setId);
 
   if (!targetSet) {
     throw new Error('Exercise or set not found.');
@@ -188,14 +163,12 @@ export function toggleStrengthSetCompleted(
 
   if (
     !targetSet.completed &&
-    (
-      targetSet.reps === null ||
+    (targetSet.reps === null ||
       !Number.isSafeInteger(targetSet.reps) ||
       targetSet.reps <= 0 ||
       targetSet.weightKg === null ||
       !Number.isFinite(targetSet.weightKg) ||
-      targetSet.weightKg < 0
-    )
+      targetSet.weightKg < 0)
   ) {
     throw new Error('Update valid reps and weight first.');
   }
@@ -207,9 +180,7 @@ export function toggleStrengthSetCompleted(
         ? {
             ...item,
             sets: item.sets.map((set) =>
-              set.id === setId
-                ? { ...set, completed: !set.completed }
-                : set,
+              set.id === setId ? { ...set, completed: !set.completed } : set,
             ),
           }
         : item,

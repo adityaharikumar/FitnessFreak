@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import type { StrengthSet } from '../types/strength.types';
 
@@ -17,49 +11,40 @@ type SetValues = {
 type StrengthSetRowProps = {
   set: StrengthSet;
   number: number;
-  onSave: (values: SetValues) => boolean;
+  onSave: (values: SetValues) => boolean | Promise<boolean>;
+  disabled?: boolean;
   onToggleCompleted: () => void;
 };
 
 export function StrengthSetRow({
-   set,
+  set,
   number,
   onSave,
   onToggleCompleted,
+  disabled = false,
 }: StrengthSetRowProps) {
-  const [repsText, setRepsText] = useState(
-    () => set.reps === null ? '' : String(set.reps),
-  );
+  const [repsText, setRepsText] = useState(() => (set.reps === null ? '' : String(set.reps)));
 
-  const [weightText, setWeightText] = useState(
-    () => set.weightKg === null ? '' : String(set.weightKg),
+  const [weightText, setWeightText] = useState(() =>
+    set.weightKg === null ? '' : String(set.weightKg),
   );
 
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
   const hasPendingChanges =
-  repsText !== (set.reps === null ? '' : String(set.reps)) ||
-  weightText !== (
-    set.weightKg === null ? '' : String(set.weightKg)
-  );
+    repsText !== (set.reps === null ? '' : String(set.reps)) ||
+    weightText !== (set.weightKg === null ? '' : String(set.weightKg));
 
-const canComplete =
-  !hasPendingChanges &&
-  set.reps !== null &&
-  set.weightKg !== null;
+  const canComplete = !hasPendingChanges && set.reps !== null && set.weightKg !== null;
 
-  function handleSave() {
+  async function handleSave() {
     const repsInput = repsText.trim();
     const weightInput = weightText.trim().replace(',', '.');
 
     const reps = Number(repsInput);
     const weightKg = Number(weightInput);
 
-    if (
-      !/^\d+$/.test(repsInput) ||
-      !Number.isSafeInteger(reps) ||
-      reps <= 0
-    ) {
+    if (!/^\d+$/.test(repsInput) || !Number.isSafeInteger(reps) || reps <= 0) {
       setError('Enter a positive whole number for reps.');
       return;
     }
@@ -73,7 +58,7 @@ const canComplete =
       return;
     }
 
-    if (onSave({ reps, weightKg })) {
+    if (await onSave({ reps, weightKg })) {
       setRepsText(String(reps));
       setWeightText(String(weightKg));
       setError('');
@@ -91,7 +76,7 @@ const canComplete =
 
           <TextInput
             accessibilityLabel={`Set ${number} reps`}
-            editable={!set.completed}
+            editable={!set.completed && !disabled}
             value={repsText}
             onChangeText={(text) => {
               setRepsText(text);
@@ -112,7 +97,7 @@ const canComplete =
           <TextInput
             accessibilityLabel={`Set ${number} weight in kilograms`}
             value={weightText}
-            editable={!set.completed}
+            editable={!set.completed && !disabled}
             onChangeText={(text) => {
               setWeightText(text);
               setSaved(false);
@@ -134,43 +119,37 @@ const canComplete =
       )}
 
       {!set.completed && (
-  <Pressable
-    accessibilityRole="button"
-    onPress={handleSave}
-    style={styles.button}
-  >
-    <Text style={styles.buttonText}>
-      {saved && !hasPendingChanges
-        ? 'Set updated'
-        : 'Update set'}
-    </Text>
-  </Pressable>
-)}
+        <Pressable
+          accessibilityRole="button"
+          disabled={disabled}
+          onPress={() => void handleSave()}
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>
+            {saved && !hasPendingChanges ? 'Set updated' : 'Update set'}
+          </Text>
+        </Pressable>
+      )}
 
-<Pressable
-  accessibilityRole="button"
-  accessibilityState={{
-    disabled: !set.completed && !canComplete,
-  }}
-  disabled={!set.completed && !canComplete}
-  onPress={onToggleCompleted}
-  style={[
-    styles.button,
-    {
-      backgroundColor: set.completed ? '#36483F' : '#C8F169',
-      opacity: !set.completed && !canComplete ? 0.45 : 1,
-    },
-  ]}
->
-  <Text
-    style={[
-      styles.buttonText,
-      { color: set.completed ? '#FFFFFF' : '#101513' },
-    ]}
-  >
-    {set.completed ? 'Undo completion' : 'Mark completed'}
-  </Text>
-</Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{
+          disabled: disabled || (!set.completed && !canComplete),
+        }}
+        disabled={disabled || (!set.completed && !canComplete)}
+        onPress={onToggleCompleted}
+        style={[
+          styles.button,
+          {
+            backgroundColor: set.completed ? '#36483F' : '#C8F169',
+            opacity: !set.completed && !canComplete ? 0.45 : 1,
+          },
+        ]}
+      >
+        <Text style={[styles.buttonText, { color: set.completed ? '#FFFFFF' : '#101513' }]}>
+          {set.completed ? 'Undo completion' : 'Mark completed'}
+        </Text>
+      </Pressable>
     </View>
   );
 }

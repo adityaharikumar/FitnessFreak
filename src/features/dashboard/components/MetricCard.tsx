@@ -1,7 +1,8 @@
 import { colors } from '@/theme/colors';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 type MetricCardProps = {
+  onPress?: () => void;
   icon: string;
   label: string;
   value: string;
@@ -11,6 +12,7 @@ type MetricCardProps = {
 };
 
 export default function MetricCard({
+  onPress,
   icon,
   label,
   value,
@@ -24,7 +26,13 @@ export default function MetricCard({
       : undefined;
 
   return (
-    <View style={styles.card}>
+    <Pressable
+      style={styles.card}
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={`${label}: ${value} ${unit}`}
+    >
       <View style={styles.row}>
         <View style={styles.iconContainer}>
           <Text style={styles.icon}>{icon}</Text>
@@ -53,7 +61,7 @@ export default function MetricCard({
           />
         </View>
       )}
-    </View>
+    </Pressable>
   );
 }
 

@@ -1,6 +1,4 @@
-export type StrengthSessionStatus =
-  | 'active'
-  | 'completed';
+export type StrengthSessionStatus = 'active' | 'completed';
 
 export type StrengthSet = {
   id: string;
